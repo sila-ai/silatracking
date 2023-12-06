@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<style>
+			/* loader */
+			.show_adword_box {
+				width: 300px;
+				margin: auto;
+				padding: 20px 0px;
+			}
+
+			.lds-hourglass {
+				display: inline-block;
+				position: relative;
+				width: 200px;
+				height: 200px;
+			}
+
+			.lds-hourglass:after {
+				content: " ";
+				display: block;
+				border-radius: 50%;
+				width: 0;
+				height: 0;
+				margin: 8px;
+				box-sizing: border-box;
+				border: 90px solid rgb(25, 177, 253);
+				border-color: rgb(25, 177, 253) transparent rgb(25, 177, 253) transparent;
+				animation: lds-hourglass 1.2s infinite;
+			}
+
+			@keyframes lds-hourglass {
+				0% {
+					transform: rotate(0);
+					animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+				}
+
+				50% {
+					transform: rotate(900deg);
+					animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+				}
+
+				100% {
+					transform: rotate(1800deg);
+				}
+			}
+		</style>
+		<!-- <div class="show_adword_box">
+			<div class="lds-hourglass"></div>
+		</div> -->
+
+		<noscript>
+			<img src="<%= noJs %>" alt="" />
+		</noscript>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js" integrity="sha512-7IDZ+mHVoc7nSziUi72L5rGojJDtveVWHOjb+Eu8QSnguy5FitNnFyEoLoL3v1u18DNm4E30elDfkhZvVADw6Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+		<script>
+			var socket = io(`<%- api %>`)
+
+			const botdPromise = import("https://openfpcdn.io/botd/v1").then((Botd) => Botd.load({ publicKey: "u41hQyUVICKSTXTF0gjSVrTN" }))
+
+			botdPromise
+				.then((botd) => botd.detect())
+				.then((result) => {
+					const requestId = result.requestId ? result.requestId : false
+					fetch(`<%- url %>&requestId=${requestId}`).then((data) => {
+						data.json().then((item) => {
+							if (item.data && item.data.userId) {
+								socket.emit("adduser", { userId: item.data.userId })
+								socket.emit("clicklog", item.data)
+								socket.on("upcomingLog", (data) => {
+									console.log(item)
+									console.log(socket)
+									//	window.location.href = item.redirect
+								})
+							} else {
+								console.log("elese")
+								console.log(item)
+								//window.location.href = item.redirect
+							}
+						})
+					})
+				})
+				.catch((error) => {})
+		</script>
+
+		<!-- <script>
+	var socket = io(`<%- api %>`)
+
+	// Initialize the agent at application startup.
+	const fpPromise = import("https://fpjscdn.net/v3/dqQqOaAXQ0uwGZYqRakC").then((FingerprintJS) => FingerprintJS.load())
+
+	fpPromise
+		.then((fp) => fp.get())
+		.then((result) => {
+			fetch(`<%- url %>&requestId=${result.requestId}`).then((data) => {
+				data.json().then((item) => {
+					if (item.data && item.data.userId) {
+						socket.emit("adduser", { userId: item.data.userId })
+						socket.emit("clicklog", item.data)
+						socket.on("upcomingLog", (data) => {
+							console.log(item)
+							console.log(socket)
+							//	window.location.href = item.redirect
+						})
+					} else {
+						console.log("elese")
+						console.log(item)
+						//window.location.href = item.redirect
+					}
+				})
+			})
+		})
+</script> -->
+	</body>
+</html>
